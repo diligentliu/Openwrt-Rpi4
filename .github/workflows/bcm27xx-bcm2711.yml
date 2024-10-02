@@ -415,19 +415,6 @@ jobs:
           rm -rf packages
           df -hT $PWD
 
-      - name: Deploy Files To Backblaze
-        env:
-          B2_APPLICATION_KEY: "${{ secrets.B2_APPLICATION_KEY }}"
-          B2_APPLICATION_KEY_ID: "${{ secrets.B2_APPLICATION_KEY_ID }}"
-          SOURCE_TARGETS: "${{ env.OPENWRT_ROOT_PATH }}/bin/targets/${{ env.DEVICE_TARGET }}/${{ env.DEVICE_SUBTARGET }}/"
-          DEST_TARGETS: "b2://${{ secrets.B2_BUCKETNAME }}/releases/targets/${{ env.DEVICE_TARGET }}/${{ env.DEVICE_SUBTARGET }}/"
-        if: env.B2_APPLICATION_KEY != null && env.B2_APPLICATION_KEY_ID != null
-        run: |
-          sudo wget -q -O /bin/b2 https://github.com/Backblaze/B2_Command_Line_Tool/releases/latest/download/b2-linux
-          sudo chmod +x /bin/b2
-          b2 authorize-account $B2_APPLICATION_KEY_ID $B2_APPLICATION_KEY
-          b2 sync --noProgress --threads 32 --keepDays 7 --replaceNewer $SOURCE_TARGETS $DEST_TARGETS
-
       - name: Delete Old Firmware Assets
         if: steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
         uses: mknejp/delete-release-assets@v1
